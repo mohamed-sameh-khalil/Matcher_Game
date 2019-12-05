@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Matcher Game</string>
+    <string name="score">Score</string>
+    <string name="highscore">High Score</string>
+</resources>
