@@ -29,9 +29,31 @@ public class MainActivity extends AppCompatActivity {
     CountDownTimer timer;
     final String highScoreKey = "highScoreKey";
     public final String SPKey = "SPkey";
-    final int TIMERSECONDS = 60 / 2;
+    final int TIMERSECONDS = 60 * 2;
     final int LEVELSCORE = 10;
     final int MISSSCORE = 2;
+    final int REMOVEDELAY = 500;
+    final int HIDEDELAY = 750;
+    final Runnable hider = new Runnable() {
+        @Override
+        public void run() {
+            hideImageView(first);
+            hideImageView(second);
+        }
+    };
+    final Runnable remover = new Runnable() {
+        @Override
+        public void run() {
+            removeImageView(removable.remove());
+            removeImageView(removable.remove());
+            if(removable.isEmpty() && countRemoved() == imageViews.length) {
+                curScore += LEVELSCORE;
+                updateScore();
+                initImagesViews();
+            }
+        }
+    };
+    final Handler handler = new Handler();
     ImageView[] imageViews;
     Boolean[] hidden;
     Boolean[] removed;
@@ -98,26 +120,17 @@ public class MainActivity extends AppCompatActivity {
                                     removed[first] = removed[second] = true;
                                     removable.add(first);
                                     removable.add(second);
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            removeImageView(removable.remove());
-                                            removeImageView(removable.remove());
-                                            if(removable.isEmpty() && countRemoved() == imageViews.length) {
-                                                curScore += LEVELSCORE;
-                                                updateScore();
-                                                initImagesViews();
-                                            }
-                                        }
-                                    }, 500);
+                                    handler.postDelayed(remover, REMOVEDELAY);
                                 }
                                 else{
                                     curScore -= MISSSCORE;
                                     if(curScore < 0) curScore = 0;
                                     updateScore();
+                                    handler.postDelayed(hider, HIDEDELAY);
                                 }
                                 break;
                             case 2:
+                                handler.removeCallbacks(hider);
                                 for(int j = 0; j < imageViews.length; j++)if (!removed[j])hideImageView(j);
                                 showImageView(index);
                                 playSound(index);
@@ -126,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                         }
                     }
-                    else{}
                 }
             });
         }
